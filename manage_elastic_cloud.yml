@@ -1,0 +1,8 @@
+- name: Manage Elastic Cloud users
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - "{{ role_path }}/vars/elastic_cloud.yml"
+    - "{{ role_path }}/vars/smtp.yml"
+  roles:
+    - elastic_access

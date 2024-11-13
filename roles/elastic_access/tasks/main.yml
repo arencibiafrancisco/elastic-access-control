@@ -1,0 +1,51 @@
+- name: Load user data from file
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/vars/users.yml"
+    name: users_data
+
+- name: Generate a random password for each user
+  ansible.builtin.set_fact:
+    user_passwords: >-
+      {{ user_passwords | default({}) | combine(
+          {item.username: lookup('password', '/dev/null length=' +
+          elastic_access_password_length | string)}
+      ) }}
+  loop: "{{ users_data.elastic_access_users }}"
+
+- name: Create or update users in Elastic Cloud
+  community.elastic.elastic_user:
+    auth_method: http_auth
+    auth_scheme: https
+    login_hosts:
+      - "{{ elastic_access_cloud_host }}"
+    login_user: "elastic"
+    login_password: "{{ elastic_access_cloud_password }}"
+    login_port: 443
+    name: "{{ item.username }}"
+    password: "{{ user_passwords[item.username] }}"
+    full_name: "{{ item.full_name }}"
+    email: "{{ item.email }}"
+    roles: "{{ item.roles }}"
+    state: "{{ item.state | default('present') }}"
+    update_password: on_create
+  loop: "{{ users_data.elastic_access_users }}"
+  register: user_creation_results
+
+# - name: Send email to users with their credentials
+#   mail:
+#     host: "{{ elastic_access_smtp_server }}"
+#     port: "{{ elastic_access_smtp_port }}"
+#     secure: starttls
+#     username: "{{ elastic_access_smtp_user }}"
+#     password: "{{ elastic_access_smtp_password }}"
+#     to: "{{ item.email }}"
+#     subject: "Your Elasticsearch Cloud Account"
+#     body: |
+#       Hello {{ item.full_name }},
+#       Your account has been created. Below are your credentials:
+#       Username: {{ item.username }}
+#       Password: {{ user_passwords[item.username] }}
+#       Please change your password after logging in.
+#     from: "{{ from_email }}"
+#   loop: "{{ users_data.users }}"
+#   delegate_to: localhost

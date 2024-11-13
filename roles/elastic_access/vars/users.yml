@@ -1,0 +1,14 @@
+elastic_access_users:
+  - username: rhysmeister
+    full_name: Rhys Campbell
+    email: rhysmeister@example.com
+    roles:
+      - viewer
+    state: absent
+
+  - username: janedoe
+    full_name: Jane Doe
+    email: janedoe@example.com
+    roles:
+      - user
+    state: absent

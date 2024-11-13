@@ -1,0 +1,5 @@
+elastic_access_smtp_server: smtp.office365.com
+elastic_access_smtp_port: 587
+elastic_access_smtp_user: notifications@yourdomain.com
+elastic_access_smtp_password: "xxxxx"
+elastic_access_from_email: notifications@yourdomain.com
