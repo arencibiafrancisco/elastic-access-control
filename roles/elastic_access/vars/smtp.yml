@@ -1,5 +1,6 @@
 elastic_access_smtp_server: smtp.eu.mailgun.org
-elastic_access_smtp_port: 25
+elastic_access_smtp_port: 587
+secure: starttls
 elastic_access_smtp_user: no-reply@example.com
 elastic_access_from_email: no-reply@example.com
 elastic_access_smtp_password: !vault |
