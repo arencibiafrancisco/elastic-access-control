@@ -18,7 +18,7 @@
     auth_scheme: https
     login_hosts:
       - "{{ elastic_access_cloud_host }}"
-    login_user: "elastic"
+    login_user: "{{ elastic_access_cloud_user }}"
     login_password: "{{ elastic_access_cloud_password }}"
     login_port: 443
     name: "{{ item.username }}"
