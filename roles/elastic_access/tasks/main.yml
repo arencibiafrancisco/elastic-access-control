@@ -31,21 +31,26 @@
   loop: "{{ users_data.elastic_access_users }}"
   register: user_creation_results
 
-# - name: Send email to users with their credentials
-#   mail:
-#     host: "{{ elastic_access_smtp_server }}"
-#     port: "{{ elastic_access_smtp_port }}"
-#     secure: starttls
-#     username: "{{ elastic_access_smtp_user }}"
-#     password: "{{ elastic_access_smtp_password }}"
-#     to: "{{ item.email }}"
-#     subject: "Your Elasticsearch Cloud Account"
-#     body: |
-#       Hello {{ item.full_name }},
-#       Your account has been created. Below are your credentials:
-#       Username: {{ item.username }}
-#       Password: {{ user_passwords[item.username] }}
-#       Please change your password after logging in.
-#     from: "{{ from_email }}"
-#   loop: "{{ users_data.users }}"
-#   delegate_to: localhost
+- name: Filter newly created users
+  set_fact:
+    new_users: "{{ user_creation_results.results | selectattr('changed', 'equalto', true) | selectattr('msg', 'search', 'created') | map(attribute='item') | list }}"
+
+- name: Send email to newly created users
+  mail:
+    host: "{{ elastic_access_smtp_server }}"
+    port: "{{ elastic_access_smtp_port }}"
+    secure: starttls
+    username: "{{ elastic_access_smtp_user }}"
+    password: "{{ elastic_access_smtp_password }}"
+    to: "{{ item.email }}"
+    subject: "Your Elasticsearch Cloud Account"
+    body: |
+      Hello {{ item.full_name }},
+      Your account has been created. Below are your credentials:
+      Username: {{ item.username }}
+      Password: {{ user_passwords[item.username] }}
+      Please change your password after logging in.
+    from: "{{ elastic_access_from_email }}"
+  loop: "{{ new_users }}"
+  delegate_to: localhost
+
