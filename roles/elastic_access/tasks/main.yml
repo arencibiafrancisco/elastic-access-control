@@ -32,11 +32,17 @@
   register: user_creation_results
 
 - name: Filter newly created users
-  set_fact:
-    new_users: "{{ user_creation_results.results | selectattr('changed', 'equalto', true) | selectattr('msg', 'search', 'created') | map(attribute='item') | list }}"
+  ansible.builtin.set_fact:
+    new_users: >-
+      {{ user_creation_results.results
+         | selectattr('changed', 'equalto', true)
+         | selectattr('msg', 'search', 'created')
+         | map(attribute='item')
+         | list
+      }}
 
 - name: Send email to newly created users
-  mail:
+  community.general.mail:
     host: "{{ elastic_access_smtp_server }}"
     port: "{{ elastic_access_smtp_port }}"
     secure: starttls
@@ -47,10 +53,8 @@
     body: |
       Hello {{ item.full_name }},
       Your account has been created. Below are your credentials:
-      Username: {{ item.username }}
       Password: {{ user_passwords[item.username] }}
       Please change your password after logging in.
     from: "{{ elastic_access_from_email }}"
   loop: "{{ new_users }}"
   delegate_to: localhost
-
